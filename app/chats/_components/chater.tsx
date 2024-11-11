@@ -6,6 +6,11 @@ import { Button, Buton, InputField } from "complexes-next-components";
 import { FaMicrophoneAlt, FaMicrophoneAltSlash } from "react-icons/fa";
 import { TbScreenShare, TbScreenShareOff } from "react-icons/tb";
 import { IoSend } from "react-icons/io5";
+import Webcam from "react-webcam";
+import Image from "next/image";
+import { MdNoPhotography, MdPhotoCamera } from "react-icons/md";
+import { SiAffinityphoto } from "react-icons/si";
+import { RiArchiveStackFill } from "react-icons/ri";
 
 const Chat = () => {
   const [messages, setMessages] = useState<
@@ -70,6 +75,10 @@ const Chat = () => {
     }
   };
 
+  const handleButtonClick = () => {
+    document.getElementById("file-input")?.click();
+  };
+
   const sendMessage = () => {
     if ((message || image) && socket) {
       const messageData = {
@@ -129,7 +138,9 @@ const Chat = () => {
     setShowEmojiPicker(false);
   };
 
-  //record aud
+  /**
+   * record aud
+   **/
   const [isRecordingAud, setIsRecordingAud] = useState(false);
   let recognition;
   const startRecordingAud = () => {
@@ -170,7 +181,9 @@ const Chat = () => {
     }
   };
 
-  // record screen
+  /**
+   * record screen
+   **/
   const [isRecording, setIsRecording] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
   console.log({ videoUrl });
@@ -220,12 +233,42 @@ const Chat = () => {
     setIsRecording(false);
   };
 
+  /**
+   * webcam
+   **/
+
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [imageSrc, setImagesrc] = useState(null);
+
+  const webCamRef = useRef(null);
+
+  const handleToggleCamera = () => {
+    setIsCameraOpen((prevState) => !prevState);
+  };
+
+  const capture = () => {
+    const imageSrc = webCamRef.current.getScreenshot();
+    setImagesrc(imageSrc);
+  };
+
   return (
     <div>
       {socket && socket.connected ? (
         <>
           <section className="flex flex-row-reverse justify-center items-center gap-4">
             <div className="bg-slate-600 p-4">
+              {isCameraOpen && (
+                <div>
+                  <Webcam
+                    className="rounded-lg"
+                    audio={false}
+                    height={400}
+                    width={400}
+                    screenshotFormat="image/png"
+                    ref={webCamRef}
+                  />
+                </div>
+              )}
               <div className="bg-white h-[600px] p-2 rounded">
                 {videoUrl && (
                   <div>
@@ -235,6 +278,14 @@ const Chat = () => {
                       Descargar video
                     </a>
                   </div>
+                )}
+                {imageSrc && (
+                  <Image
+                    src={imageSrc}
+                    alt="imagen de camara"
+                    width={200}
+                    height={200}
+                  />
                 )}
                 {messages.map((msg, index) => {
                   console.log("Mensaje recibido:", msg);
@@ -300,42 +351,79 @@ const Chat = () => {
                   </div>
                 )}
               </div>
-              {isRecordingAud ? (
+              <div className="flex gap-2 bg-red-500">
+                {isRecordingAud ? (
+                  <Buton
+                    colVariant="danger"
+                    size="sm"
+                    rounded="lg"
+                    onClick={stopRecordingAud}
+                  >
+                    <FaMicrophoneAlt color="red" />
+                  </Buton>
+                ) : (
+                  <Buton
+                    onClick={startRecordingAud}
+                    colVariant="success"
+                    size="md"
+                    rounded="md"
+                  >
+                    <FaMicrophoneAltSlash color="green" />
+                  </Buton>
+                )}
+                {isRecording && <p style={{ color: "red" }}>Grabando...</p>}
                 <Buton
-                  colVariant="danger"
-                  size="sm"
-                  rounded="lg"
-                  onClick={stopRecordingAud}
+                  colVariant="success"
+                  onClick={isRecording ? stopRecording : startRecording}
                 >
-                  <FaMicrophoneAlt color="red" />
+                  {isRecording ? (
+                    <TbScreenShareOff color="red" />
+                  ) : (
+                    <TbScreenShare color="green" />
+                  )}
                 </Buton>
-              ) : (
+
                 <Buton
-                  onClick={startRecordingAud}
                   colVariant="success"
                   size="md"
                   rounded="md"
+                  onClick={handleToggleCamera}
                 >
-                  <FaMicrophoneAltSlash color="green" />
+                  {isCameraOpen ? (
+                    <MdPhotoCamera color="red" />
+                  ) : (
+                    <MdNoPhotography color="green" />
+                  )}
                 </Buton>
-              )}
-              {isRecording && <p style={{ color: "red" }}>Grabando...</p>}
-              <Buton
-                colVariant="success"
-                className="ml-4"
-                onClick={isRecording ? stopRecording : startRecording}
-              >
-                {isRecording ? (
-                  <TbScreenShareOff color="red" />
-                ) : (
-                  <TbScreenShare color="green" />
+                {isCameraOpen && (
+                  <Button
+                    colVariant="success"
+                    size="md"
+                    rounded="md"
+                    onClick={capture}
+                  >
+                    <SiAffinityphoto color="blue" />
+                  </Button>
                 )}
-              </Buton>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e)}
-              />
+
+                <div>
+                  <Buton
+                    colVariant="success"
+                    size="md"
+                    rounded="md"
+                    onClick={handleButtonClick}
+                  >
+                    <RiArchiveStackFill color="green" />
+                  </Buton>
+                  <input
+                    id="file-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    style={{ display: "none" }}
+                  />
+                </div>
+              </div>
             </div>
             <div className="bg-gray-100 p-4 rounded shadow-md">
               <h2 className="font-semibold text-lg mb-2">
@@ -350,6 +438,33 @@ const Chat = () => {
               </ul>
             </div>
           </section>
+          <div>
+            {/* <Button onClick={handleToggleCamera}>
+              {isCameraOpen ? "cerrar" : "abrir"}
+            </Button> */}
+
+            {/* {isCameraOpen && (
+              <div>
+                <Webcam
+                  className="rounded-lg"
+                  audio={false}
+                  height={400}
+                  width={400}
+                  screenshotFormat="image/png"
+                  ref={webCamRef}
+                />
+                <Button onClick={capture}>capture foto</Button>
+                {imageSrc && (
+                  <Image
+                    src={imageSrc}
+                    alt="imagen de camara"
+                    width={200}
+                    height={200}
+                  />
+                )}
+              </div>
+            )} */}
+          </div>
         </>
       ) : (
         <div className="center">
