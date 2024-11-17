@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { initializeSocket } from "./socket";
 import { Socket } from "socket.io-client";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
@@ -11,6 +11,10 @@ import Image from "next/image";
 import { MdNoPhotography, MdPhotoCamera } from "react-icons/md";
 import { SiAffinityphoto } from "react-icons/si";
 import { RiArchiveStackFill } from "react-icons/ri";
+import useAudioRecording from "./record-aud";
+import useScreenRecorder from "./record-screen";
+import useWebCam from "./web-cam";
+import Form from "./registers/_components/form";
 
 const Chat = () => {
   const [messages, setMessages] = useState<
@@ -31,12 +35,10 @@ const Chat = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [image, setImage] = useState<string | null>(null);
+  const [toogle, setToggle] = useState<boolean>(false);
 
   useEffect(() => {
     if (socket) {
-      // socket.on("on-message", (data) => {
-      //   setMessages((prevMessages) => [...prevMessages, data]);
-      // });
       socket.on(
         "on-message",
         (data: {
@@ -93,26 +95,6 @@ const Chat = () => {
     }
   };
 
-  // const sendMessage = () => {
-  //   if ((message || image) && socket) {
-  //     const messageData = {
-  //       id: socket.id,
-  //       name: username,
-  //       message: {
-  //         text: message || undefined,
-  //         imageUrl: image || undefined,
-  //       },
-  //     };
-
-  //     console.log("Enviando mensaje:", messageData); // Revisión de estructura
-  //     socket.emit("send-message", messageData);
-
-  //     // Resetea el estado del mensaje y la imagen después de enviar
-  //     setMessage("");
-  //     setImage(null);
-  //   }
-  // };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (username) {
@@ -141,116 +123,19 @@ const Chat = () => {
   /**
    * record aud
    **/
-  const [isRecordingAud, setIsRecordingAud] = useState(false);
-  let recognition;
-  const startRecordingAud = () => {
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = "es-ES";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      setIsRecordingAud(true);
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-
-      if (socket) {
-        socket.emit("send-message", { name: username, message: transcript });
-      }
-      setIsRecordingAud(false);
-    };
-
-    recognition.onerror = (event) => {
-      setIsRecordingAud(false);
-    };
-
-    recognition.onspeechend = () => {
-      recognition.stop();
-      setIsRecordingAud(false);
-    };
-
-    recognition.start();
-  };
-
-  const stopRecordingAud = () => {
-    if (recognition) {
-      recognition.stop();
-      setIsRecordingAud(false);
-    }
-  };
+  const { isRecordingAud, startRecordingAud, stopRecordingAud } =
+    useAudioRecording(socket, username);
 
   /**
    * record screen
    **/
-  const [isRecording, setIsRecording] = useState(false);
-  const [videoUrl, setVideoUrl] = useState(null);
-  console.log({ videoUrl });
-  const mediaRecorderRef = useRef(null);
-  const videoChunks = useRef([]);
-
-  const startRecording = async () => {
-    try {
-      // Solicitar acceso a la pantalla del usuario
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true,
-      });
-
-      // Crear MediaRecorder para la transmisión
-      mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: "video/webm; codecs=vp9",
-      });
-
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          console.log("Nuevo chunk de video recibido");
-          videoChunks.current.push(event.data);
-        }
-      };
-
-      mediaRecorderRef.current.onstop = () => {
-        console.log("Grabación detenida. Generando URL de video...");
-        // Convertir los datos grabados en una URL de video
-        const blob = new Blob(videoChunks.current, { type: "video/webm" });
-        const url = URL.createObjectURL(blob);
-        setVideoUrl(url); // Guardar la URL generada
-        videoChunks.current = []; // Resetear los chunks después de grabar
-      };
-
-      mediaRecorderRef.current.start();
-      console.log("Grabación iniciada...");
-      setIsRecording(true);
-    } catch (error) {
-      console.error("Error al intentar acceder a la pantalla: ", error);
-    }
-  };
-
-  const stopRecording = () => {
-    console.log("Deteniendo la grabación...");
-    mediaRecorderRef.current.stop();
-    setIsRecording(false);
-  };
-
+  const { isRecording, startRecording, stopRecording, videoUrl } =
+    useScreenRecorder();
   /**
    * webcam
    **/
-
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [imageSrc, setImagesrc] = useState(null);
-
-  const webCamRef = useRef(null);
-
-  const handleToggleCamera = () => {
-    setIsCameraOpen((prevState) => !prevState);
-  };
-
-  const capture = () => {
-    const imageSrc = webCamRef.current.getScreenshot();
-    setImagesrc(imageSrc);
-  };
-
+  const { capture, handleToggleCamera, imageSrc, isCameraOpen, webCamRef } =
+    useWebCam();
   return (
     <div>
       {socket && socket.connected ? (
@@ -438,48 +323,42 @@ const Chat = () => {
               </ul>
             </div>
           </section>
-          <div>
-            {/* <Button onClick={handleToggleCamera}>
-              {isCameraOpen ? "cerrar" : "abrir"}
-            </Button> */}
-
-            {/* {isCameraOpen && (
-              <div>
-                <Webcam
-                  className="rounded-lg"
-                  audio={false}
-                  height={400}
-                  width={400}
-                  screenshotFormat="image/png"
-                  ref={webCamRef}
-                />
-                <Button onClick={capture}>capture foto</Button>
-                {imageSrc && (
-                  <Image
-                    src={imageSrc}
-                    alt="imagen de camara"
-                    width={200}
-                    height={200}
-                  />
-                )}
-              </div>
-            )} */}
-          </div>
         </>
       ) : (
         <div className="center">
-          <form className="form" onSubmit={handleSubmit}>
-            <InputField
-              placeholder="Tu nombre"
-              type="text"
+          <div className="flex bg-blue-400 w-auto justify-center rounded-full">
+            <Button
+              size="full"
               rounded="lg"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <Button colVariant="success" size="md" rounded="md" type="submit">
-              Conectar
+              colVariant={toogle ? "success" : "primary"}
+              onClick={() => setToggle(!toogle)}
+            >
+              Registarse
             </Button>
-          </form>
+            <Button
+              size="full"
+              rounded="lg"
+              colVariant={!toogle ? "success" : "primary"}
+              onClick={() => setToggle(!toogle)}
+            >
+              Iniciar sesion
+            </Button>
+          </div>
+          {toogle && <Form />}
+          {!toogle && (
+            <form className="form" onSubmit={handleSubmit}>
+              <InputField
+                placeholder="Tu nombre"
+                type="text"
+                rounded="lg"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <Button colVariant="success" size="md" rounded="md" type="submit">
+                Conectar
+              </Button>
+            </form>
+          )}
         </div>
       )}
     </div>
