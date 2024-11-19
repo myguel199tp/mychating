@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { initializeSocket } from "./socket";
 import { Socket } from "socket.io-client";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-import { Button, Buton, InputField } from "complexes-next-components";
+import {
+  Button,
+  Buton,
+  InputField,
+  Avatar,
+  Text,
+  Title,
+} from "complexes-next-components";
 import { FaMicrophoneAlt, FaMicrophoneAltSlash } from "react-icons/fa";
 import { TbScreenShare, TbScreenShareOff } from "react-icons/tb";
 import { IoSend } from "react-icons/io5";
@@ -140,189 +147,210 @@ const Chat = () => {
     <div>
       {socket && socket.connected ? (
         <>
-          <section className="flex flex-row-reverse justify-center items-center gap-4">
-            <div className="bg-slate-600 p-4">
-              {isCameraOpen && (
-                <div>
-                  <Webcam
-                    className="rounded-lg"
-                    audio={false}
-                    height={400}
-                    width={400}
-                    screenshotFormat="image/png"
-                    ref={webCamRef}
-                  />
-                </div>
-              )}
-              <div className="bg-white h-[600px] p-2 rounded">
-                {videoUrl && (
-                  <div>
-                    <h2>Video grabado:</h2>
-                    <video src={videoUrl} controls width="600" />
-                    <a href={videoUrl} download="grabacion.webm">
-                      Descargar video
-                    </a>
-                  </div>
-                )}
-                {imageSrc && (
-                  <Image
-                    src={imageSrc}
-                    alt="imagen de camara"
-                    width={200}
-                    height={200}
-                  />
-                )}
-                {messages.map((msg, index) => {
-                  console.log("Mensaje recibido:", msg);
-                  return (
-                    <div
-                      className="flex"
-                      key={index}
-                      style={{ margin: "3px", padding: "2px" }}
-                    >
-                      <p style={{ color: "#111" }}>
-                        {msg.name ? String(msg.name) : "Usuario desconocido"}:
-                      </p>
-                      {msg.message && (
-                        <p style={{ color: "#111" }}>{String(msg.message)}</p>
-                      )}
-                      {msg.message?.audioUrl && (
-                        <audio controls src={msg.message.audioUrl}></audio>
-                      )}
-                      {msg.message?.imageUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={msg.message.imageUrl}
-                          alt="Mensaje"
-                          style={{ maxWidth: "200px" }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex gap-2 mt-2 justify-center w-full">
-                <InputField
-                  className="w-full"
-                  rounded="lg"
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Escribe un mensaje"
-                />
-                <Button
-                  colVariant="success"
-                  className="ml-4"
-                  size="sm"
-                  rounded="lg"
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                >
-                  😊
-                </Button>
-                <Button
-                  className="flex-grow-0"
-                  colVariant="primary"
-                  rounded="lg"
-                  size="sm"
-                  onClick={sendMessage}
-                >
-                  <IoSend />
-                </Button>
-              </div>
-              <div className="mt-4">
-                {showEmojiPicker && (
-                  <div className="emoji-picker">
-                    <EmojiPicker onEmojiClick={addEmoji} />
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2 bg-red-500">
-                {isRecordingAud ? (
-                  <Buton
-                    colVariant="danger"
-                    size="sm"
-                    rounded="lg"
-                    onClick={stopRecordingAud}
-                  >
-                    <FaMicrophoneAlt color="red" />
-                  </Buton>
-                ) : (
-                  <Buton
-                    onClick={startRecordingAud}
-                    colVariant="success"
-                    size="md"
-                    rounded="md"
-                  >
-                    <FaMicrophoneAltSlash color="green" />
-                  </Buton>
-                )}
-                {isRecording && <p style={{ color: "red" }}>Grabando...</p>}
-                <Buton
-                  colVariant="success"
-                  onClick={isRecording ? stopRecording : startRecording}
-                >
-                  {isRecording ? (
-                    <TbScreenShareOff color="red" />
-                  ) : (
-                    <TbScreenShare color="green" />
-                  )}
-                </Buton>
-
-                <Buton
-                  colVariant="success"
-                  size="md"
-                  rounded="md"
-                  onClick={handleToggleCamera}
-                >
-                  {isCameraOpen ? (
-                    <MdPhotoCamera color="red" />
-                  ) : (
-                    <MdNoPhotography color="green" />
-                  )}
-                </Buton>
-                {isCameraOpen && (
-                  <Button
-                    colVariant="success"
-                    size="md"
-                    rounded="md"
-                    onClick={capture}
-                  >
-                    <SiAffinityphoto color="blue" />
-                  </Button>
-                )}
-
-                <div>
-                  <Buton
-                    colVariant="success"
-                    size="md"
-                    rounded="md"
-                    onClick={handleButtonClick}
-                  >
-                    <RiArchiveStackFill color="green" />
-                  </Buton>
-                  <input
-                    id="file-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    style={{ display: "none" }}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-100 p-4 rounded shadow-md">
-              <h2 className="font-semibold text-lg mb-2">
+          <div className="flex">
+            <section className="bg-gray-100 p-4 rounded shadow-md">
+              <Title size="lg" className="font-semibold text-lg mb-2">
                 Clientes conectados
-              </h2>
+              </Title>
               <ul>
                 {clients.map((client) => (
                   <li key={client.id} className="mb-1">
-                    {client.name}
+                    <div className="flex items-center gap-4">
+                      <Avatar
+                        shape="rounded"
+                        alt={client.name}
+                        size="md"
+                        border="none"
+                        src="https://th.bing.com/th/id/R.5109ba1cf72642b6f68a35f37491b340?rik=K7O6n7sQB%2flV7g&riu=http%3a%2f%2fimages6.fanpop.com%2fimage%2fphotos%2f36800000%2f-Luffy-monkey-d-luffy-36845039-1280-800.jpg&ehk=QePyEB4V6cBr7rKXkraLr1oH9rovNLHvMEn0RG9%2f1ek%3d&risl=&pid=ImgRaw&r=0"
+                      />
+                      <div>
+                        <Text size="md">{client.name}</Text>
+                        <Text size="sm"> este es mi motivo y el mensaje </Text>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
-            </div>
-          </section>
+            </section>
+            <section className="flex flex-row-reverse justify-center items-center gap-4 w-full">
+              <div className="bg-slate-600 p-4 w-full">
+                {isCameraOpen && (
+                  <div>
+                    <Webcam
+                      className="rounded-lg"
+                      audio={false}
+                      height={400}
+                      width={400}
+                      screenshotFormat="image/png"
+                      ref={webCamRef}
+                    />
+                  </div>
+                )}
+                <div className="bg-black h-[600px] p-2 rounded">
+                  {videoUrl && (
+                    <div>
+                      <h2>Video grabado:</h2>
+                      <video src={videoUrl} controls width="600" />
+                      <a href={videoUrl} download="grabacion.webm">
+                        Descargar video
+                      </a>
+                    </div>
+                  )}
+                  {imageSrc && (
+                    <Image
+                      src={imageSrc}
+                      alt="imagen de camara"
+                      width={200}
+                      height={200}
+                    />
+                  )}
+                  {messages.map((msg, index) => {
+                    console.log("Mensaje recibido:", msg);
+                    return (
+                      <div
+                        className="flex items-center gap-2 bg-slate-400 p-2 rounded-md"
+                        key={index}
+                        style={{ margin: "3px", padding: "2px" }}
+                      >
+                        <Avatar
+                          shape="rounded"
+                          alt={msg.name}
+                          size="md"
+                          border="none"
+                          src="https://th.bing.com/th/id/R.5109ba1cf72642b6f68a35f37491b340?rik=K7O6n7sQB%2flV7g&riu=http%3a%2f%2fimages6.fanpop.com%2fimage%2fphotos%2f36800000%2f-Luffy-monkey-d-luffy-36845039-1280-800.jpg&ehk=QePyEB4V6cBr7rKXkraLr1oH9rovNLHvMEn0RG9%2f1ek%3d&risl=&pid=ImgRaw&r=0"
+                        />
+                        <Text font="semi" size="sm">
+                          {msg.name ? String(msg.name) : "Usuario desconocido"}:
+                        </Text>
+                        {msg.message && (
+                          <Text size="sm">{String(msg.message)}</Text>
+                        )}
+                        {msg.message?.audioUrl && (
+                          <audio controls src={msg.message.audioUrl}></audio>
+                        )}
+                        {msg.message?.imageUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={msg.message.imageUrl}
+                            alt="Mensaje"
+                            style={{ maxWidth: "200px" }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-2 mt-2 justify-center w-full">
+                  <InputField
+                    className="w-full"
+                    rounded="lg"
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Escribe un mensaje"
+                  />
+                  <Button
+                    colVariant="success"
+                    className="ml-4"
+                    size="sm"
+                    rounded="lg"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  >
+                    😊
+                  </Button>
+                  <Button
+                    className="flex-grow-0"
+                    colVariant="primary"
+                    rounded="lg"
+                    size="sm"
+                    onClick={sendMessage}
+                  >
+                    <IoSend />
+                  </Button>
+                </div>
+                <div className="mt-4">
+                  {showEmojiPicker && (
+                    <div className="emoji-picker">
+                      <EmojiPicker onEmojiClick={addEmoji} />
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2 justify-center">
+                  {isRecordingAud ? (
+                    <Buton
+                      colVariant="danger"
+                      size="sm"
+                      rounded="lg"
+                      onClick={stopRecordingAud}
+                    >
+                      <FaMicrophoneAlt color="red" />
+                    </Buton>
+                  ) : (
+                    <Buton
+                      onClick={startRecordingAud}
+                      colVariant="success"
+                      size="md"
+                      rounded="md"
+                    >
+                      <FaMicrophoneAltSlash color="green" />
+                    </Buton>
+                  )}
+                  {isRecording && <p style={{ color: "red" }}>Grabando...</p>}
+                  <Buton
+                    colVariant="success"
+                    onClick={isRecording ? stopRecording : startRecording}
+                  >
+                    {isRecording ? (
+                      <TbScreenShareOff color="red" />
+                    ) : (
+                      <TbScreenShare color="green" />
+                    )}
+                  </Buton>
+
+                  <Buton
+                    colVariant="success"
+                    size="md"
+                    rounded="md"
+                    onClick={handleToggleCamera}
+                  >
+                    {isCameraOpen ? (
+                      <MdPhotoCamera color="red" />
+                    ) : (
+                      <MdNoPhotography color="green" />
+                    )}
+                  </Buton>
+                  {isCameraOpen && (
+                    <Button
+                      colVariant="success"
+                      size="md"
+                      rounded="md"
+                      onClick={capture}
+                    >
+                      <SiAffinityphoto color="blue" />
+                    </Button>
+                  )}
+
+                  <div>
+                    <Buton
+                      colVariant="success"
+                      size="md"
+                      rounded="md"
+                      onClick={handleButtonClick}
+                    >
+                      <RiArchiveStackFill color="green" />
+                    </Buton>
+                    <input
+                      id="file-input"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      style={{ display: "none" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
         </>
       ) : (
         <div className="center">
