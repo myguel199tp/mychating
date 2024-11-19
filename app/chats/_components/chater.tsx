@@ -10,7 +10,11 @@ import {
   Text,
   Title,
 } from "complexes-next-components";
-import { FaMicrophoneAlt, FaMicrophoneAltSlash } from "react-icons/fa";
+import {
+  FaMicrophoneAlt,
+  FaMicrophoneAltSlash,
+  FaSearch,
+} from "react-icons/fa";
 import { TbScreenShare, TbScreenShareOff } from "react-icons/tb";
 import { IoSend } from "react-icons/io5";
 import Webcam from "react-webcam";
@@ -22,6 +26,7 @@ import useAudioRecording from "./record-aud";
 import useScreenRecorder from "./record-screen";
 import useWebCam from "./web-cam";
 import Form from "./registers/_components/form";
+import { GiWallet } from "react-icons/gi";
 
 const Chat = () => {
   const [messages, setMessages] = useState<
@@ -124,7 +129,6 @@ const Chat = () => {
 
   const addEmoji = (emojiData: EmojiClickData) => {
     setMessage((prevMessage) => prevMessage + emojiData.emoji);
-    setShowEmojiPicker(false);
   };
 
   /**
@@ -149,13 +153,13 @@ const Chat = () => {
         <>
           <div className="flex">
             <section className="bg-gray-100 p-4 rounded shadow-md">
-              <Title size="lg" className="font-semibold text-lg mb-2">
+              <Title size="xs" font="bold" className="m-2">
                 Clientes conectados
               </Title>
               <ul>
                 {clients.map((client) => (
                   <li key={client.id} className="mb-1">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 hover:bg-slate-300 p-2 rounded-md cursor-pointer">
                       <Avatar
                         shape="rounded"
                         alt={client.name}
@@ -164,7 +168,9 @@ const Chat = () => {
                         src="https://th.bing.com/th/id/R.5109ba1cf72642b6f68a35f37491b340?rik=K7O6n7sQB%2flV7g&riu=http%3a%2f%2fimages6.fanpop.com%2fimage%2fphotos%2f36800000%2f-Luffy-monkey-d-luffy-36845039-1280-800.jpg&ehk=QePyEB4V6cBr7rKXkraLr1oH9rovNLHvMEn0RG9%2f1ek%3d&risl=&pid=ImgRaw&r=0"
                       />
                       <div>
-                        <Text size="md">{client.name}</Text>
+                        <Text size="md" font="bold">
+                          {client.name}
+                        </Text>
                         <Text size="sm"> este es mi motivo y el mensaje </Text>
                       </div>
                     </div>
@@ -173,19 +179,55 @@ const Chat = () => {
               </ul>
             </section>
             <section className="flex flex-row-reverse justify-center items-center gap-4 w-full">
-              <div className="bg-slate-600 p-4 w-full">
+              <div className="bg-slate-300 p-4 w-full">
                 {isCameraOpen && (
-                  <div>
-                    <Webcam
-                      className="rounded-lg"
-                      audio={false}
-                      height={400}
-                      width={400}
-                      screenshotFormat="image/png"
-                      ref={webCamRef}
-                    />
+                  <div className="relative w-full">
+                    <div className="absolute z-20 right-0 p-2">
+                      <Webcam
+                        className="rounded-lg"
+                        audio={false}
+                        height={400}
+                        width={400}
+                        screenshotFormat="image/png"
+                        ref={webCamRef}
+                      />
+                    </div>
                   </div>
                 )}
+                <section className="flex">
+                  <Buton
+                    size="sm"
+                    rounded="sm"
+                    colVariant="default"
+                    borderWidth="thin"
+                  >
+                    grupo
+                  </Buton>
+                  <Buton
+                    size="sm"
+                    rounded="sm"
+                    colVariant="default"
+                    borderWidth="thin"
+                  >
+                    grupo
+                  </Buton>
+                  <Buton
+                    size="sm"
+                    rounded="sm"
+                    colVariant="default"
+                    borderWidth="thin"
+                  >
+                    grupo
+                  </Buton>
+                  <Buton
+                    size="sm"
+                    rounded="sm"
+                    colVariant="default"
+                    borderWidth="thin"
+                  >
+                    grupo
+                  </Buton>
+                </section>
                 <div className="bg-black h-[600px] p-2 rounded">
                   {videoUrl && (
                     <div>
@@ -208,7 +250,7 @@ const Chat = () => {
                     console.log("Mensaje recibido:", msg);
                     return (
                       <div
-                        className="flex items-center gap-2 bg-slate-400 p-2 rounded-md"
+                        className="flex items-center gap-2 bg-slate-300 p-2 rounded-md"
                         key={index}
                         style={{ margin: "3px", padding: "2px" }}
                       >
@@ -240,7 +282,25 @@ const Chat = () => {
                     );
                   })}
                 </div>
-                <div className="flex gap-2 mt-2 justify-center w-full">
+                <div className="flex gap-2 mt-2 justify-center items-center w-full">
+                  <div className="relative">
+                    {showEmojiPicker && (
+                      <div className="absolute bottom-full mb-2 z-10">
+                        <div className="emoji-picker bg-white shadow-lg rounded">
+                          <EmojiPicker onEmojiClick={addEmoji} />
+                        </div>
+                      </div>
+                    )}
+                    <Button
+                      colVariant="success"
+                      className="ml-4"
+                      size="md"
+                      rounded="lg"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      😊
+                    </Button>
+                  </div>
                   <InputField
                     className="w-full"
                     rounded="lg"
@@ -249,33 +309,24 @@ const Chat = () => {
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Escribe un mensaje"
                   />
-                  <Button
-                    colVariant="success"
-                    className="ml-4"
-                    size="sm"
-                    rounded="lg"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  >
-                    😊
-                  </Button>
+
                   <Button
                     className="flex-grow-0"
                     colVariant="primary"
                     rounded="lg"
-                    size="sm"
+                    size="md"
                     onClick={sendMessage}
                   >
                     <IoSend />
                   </Button>
                 </div>
-                <div className="mt-4">
-                  {showEmojiPicker && (
-                    <div className="emoji-picker">
-                      <EmojiPicker onEmojiClick={addEmoji} />
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2 justify-center">
+                <div className="flex gap-2 justify-center mt-1">
+                  <Buton colVariant="success" size="md" rounded="md">
+                    <FaSearch color="green" />
+                  </Buton>
+                  <Buton colVariant="success" size="md" rounded="md">
+                    <GiWallet color="green" />
+                  </Buton>
                   {isRecordingAud ? (
                     <Buton
                       colVariant="danger"
