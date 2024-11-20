@@ -48,6 +48,21 @@ const Chat = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [toogle, setToggle] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const filterClients = () => {
+    return clients.filter((client) =>
+      client.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
+  const filterMessages = () => {
+    return messages.filter(
+      (msg) =>
+        msg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        msg.message.text?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
 
   useEffect(() => {
     if (socket) {
@@ -153,11 +168,16 @@ const Chat = () => {
         <>
           <div className="flex">
             <section className="bg-gray-100 p-4 rounded shadow-md">
+              <InputField
+                placeholder="Buscar"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
               <Title size="xs" font="bold" className="m-2">
-                Clientes conectados
+                Conectados
               </Title>
               <ul>
-                {clients.map((client) => (
+                {filterClients().map((client) => (
                   <li key={client.id} className="mb-1">
                     <div className="flex items-center gap-4 hover:bg-slate-300 p-2 rounded-md cursor-pointer">
                       <Avatar
@@ -246,41 +266,38 @@ const Chat = () => {
                       height={200}
                     />
                   )}
-                  {messages.map((msg, index) => {
-                    console.log("Mensaje recibido:", msg);
-                    return (
-                      <div
-                        className="flex items-center gap-2 bg-slate-300 p-2 rounded-md"
-                        key={index}
-                        style={{ margin: "3px", padding: "2px" }}
-                      >
-                        <Avatar
-                          shape="rounded"
-                          alt={msg.name}
-                          size="md"
-                          border="none"
-                          src="https://th.bing.com/th/id/R.5109ba1cf72642b6f68a35f37491b340?rik=K7O6n7sQB%2flV7g&riu=http%3a%2f%2fimages6.fanpop.com%2fimage%2fphotos%2f36800000%2f-Luffy-monkey-d-luffy-36845039-1280-800.jpg&ehk=QePyEB4V6cBr7rKXkraLr1oH9rovNLHvMEn0RG9%2f1ek%3d&risl=&pid=ImgRaw&r=0"
+                  {filterMessages().map((msg, index) => (
+                    <div
+                      className="flex items-center gap-2 bg-slate-300 p-2 rounded-md"
+                      key={index}
+                      style={{ margin: "3px", padding: "2px" }}
+                    >
+                      <Avatar
+                        shape="rounded"
+                        alt={msg.name}
+                        size="md"
+                        border="none"
+                        src="https://th.bing.com/th/id/R.5109ba1cf72642b6f68a35f37491b340?rik=K7O6n7sQB%2flV7g&riu=http%3a%2f%2fimages6.fanpop.com%2fimage%2fphotos%2f36800000%2f-Luffy-monkey-d-luffy-36845039-1280-800.jpg&ehk=QePyEB4V6cBr7rKXkraLr1oH9rovNLHvMEn0RG9%2f1ek%3d&risl=&pid=ImgRaw&r=0"
+                      />
+                      <Text font="semi" size="sm">
+                        {msg.name ? String(msg.name) : "Usuario desconocido"}:
+                      </Text>
+                      {msg.message && (
+                        <Text size="sm">{String(msg.message)}</Text>
+                      )}
+                      {msg.message?.audioUrl && (
+                        <audio controls src={msg.message.audioUrl}></audio>
+                      )}
+                      {msg.message?.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={msg.message.imageUrl}
+                          alt="Mensaje"
+                          style={{ maxWidth: "200px" }}
                         />
-                        <Text font="semi" size="sm">
-                          {msg.name ? String(msg.name) : "Usuario desconocido"}:
-                        </Text>
-                        {msg.message && (
-                          <Text size="sm">{String(msg.message)}</Text>
-                        )}
-                        {msg.message?.audioUrl && (
-                          <audio controls src={msg.message.audioUrl}></audio>
-                        )}
-                        {msg.message?.imageUrl && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={msg.message.imageUrl}
-                            alt="Mensaje"
-                            style={{ maxWidth: "200px" }}
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
+                      )}
+                    </div>
+                  ))}
                 </div>
                 <div className="flex gap-2 mt-2 justify-center items-center w-full">
                   <div className="relative">
@@ -321,9 +338,6 @@ const Chat = () => {
                   </Button>
                 </div>
                 <div className="flex gap-2 justify-center mt-1">
-                  <Buton colVariant="success" size="md" rounded="md">
-                    <FaSearch color="green" />
-                  </Buton>
                   <Buton colVariant="success" size="md" rounded="md">
                     <GiWallet color="green" />
                   </Buton>
