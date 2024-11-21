@@ -1,3 +1,5 @@
-*.ts text eol=lf
+# Forzar LF en archivos de texto
+* text=auto
 *.tsx text eol=lf
+*.ts text eol=lf
 *.json text eol=lf

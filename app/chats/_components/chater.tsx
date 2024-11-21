@@ -166,7 +166,7 @@ const Chat = () => {
         <ModalWallet
           isOpen={searchModal}
           onClose={() => setSearchModal(false)}
-          title="Billetera"
+          title="BilleteraÑ"
         />
       )}
 
