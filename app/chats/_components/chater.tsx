@@ -10,11 +10,7 @@ import {
   Text,
   Title,
 } from "complexes-next-components";
-import {
-  FaMicrophoneAlt,
-  FaMicrophoneAltSlash,
-  FaSearch,
-} from "react-icons/fa";
+import { FaMicrophoneAlt, FaMicrophoneAltSlash } from "react-icons/fa";
 import { TbScreenShare, TbScreenShareOff } from "react-icons/tb";
 import { IoSend } from "react-icons/io5";
 import Webcam from "react-webcam";
@@ -27,6 +23,7 @@ import useScreenRecorder from "./record-screen";
 import useWebCam from "./web-cam";
 import Form from "./registers/_components/form";
 import { GiWallet } from "react-icons/gi";
+import ModalWallet from "./modal/modal-wallet";
 
 const Chat = () => {
   const [messages, setMessages] = useState<
@@ -49,6 +46,7 @@ const Chat = () => {
   const [image, setImage] = useState<string | null>(null);
   const [toogle, setToggle] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchModal, setSearchModal] = useState<boolean>(false);
 
   const filterClients = () => {
     return clients.filter((client) =>
@@ -164,6 +162,14 @@ const Chat = () => {
     useWebCam();
   return (
     <div>
+      {searchModal && (
+        <ModalWallet
+          isOpen={searchModal}
+          onClose={() => setSearchModal(false)}
+          title="Billetera"
+        />
+      )}
+
       {socket && socket.connected ? (
         <>
           <div className="flex">
@@ -338,7 +344,12 @@ const Chat = () => {
                   </Button>
                 </div>
                 <div className="flex gap-2 justify-center mt-1">
-                  <Buton colVariant="success" size="md" rounded="md">
+                  <Buton
+                    colVariant="success"
+                    size="md"
+                    rounded="md"
+                    onClick={() => setSearchModal(true)}
+                  >
                     <GiWallet color="green" />
                   </Buton>
                   {isRecordingAud ? (
