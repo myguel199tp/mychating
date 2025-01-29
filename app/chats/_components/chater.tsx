@@ -220,40 +220,6 @@ const Chat = () => {
                     </div>
                   </div>
                 )}
-                <section className="flex">
-                  <Buton
-                    size="sm"
-                    rounded="sm"
-                    colVariant="default"
-                    borderWidth="thin"
-                  >
-                    grupo
-                  </Buton>
-                  <Buton
-                    size="sm"
-                    rounded="sm"
-                    colVariant="default"
-                    borderWidth="thin"
-                  >
-                    grupo
-                  </Buton>
-                  <Buton
-                    size="sm"
-                    rounded="sm"
-                    colVariant="default"
-                    borderWidth="thin"
-                  >
-                    grupo
-                  </Buton>
-                  <Buton
-                    size="sm"
-                    rounded="sm"
-                    colVariant="default"
-                    borderWidth="thin"
-                  >
-                    grupo
-                  </Buton>
-                </section>
                 <div className="bg-black h-[600px] p-2 rounded">
                   {videoUrl && (
                     <div>
@@ -450,18 +416,26 @@ const Chat = () => {
           </div>
           {toogle && <Form />}
           {!toogle && (
-            <form className="form" onSubmit={handleSubmit}>
-              <InputField
-                placeholder="Tu nombre"
-                type="text"
-                rounded="lg"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <Button colVariant="success" size="md" rounded="md" type="submit">
-                Conectar
-              </Button>
-            </form>
+            <div className="w-full flex justify-center items-center">
+              <form className="form mt-4" onSubmit={handleSubmit}>
+                <InputField
+                  placeholder="Tu nombre"
+                  type="text"
+                  rounded="lg"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <Button
+                  className="mt-4"
+                  colVariant="success"
+                  size="md"
+                  rounded="md"
+                  type="submit"
+                >
+                  Conectar
+                </Button>
+              </form>
+            </div>
           )}
         </div>
       )}
